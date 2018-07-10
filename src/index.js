@@ -60,7 +60,6 @@
 		.text(function(d){
 			return d.score;
 		});
-
 	// Functions
 	function createNodes(data){
 		return data.reduce((list, element) => {
