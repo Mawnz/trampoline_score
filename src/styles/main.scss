@@ -1,0 +1,26 @@
+$colorBlue: #3264b4;
+
+
+circle.default {
+	transition: all 0.2s ease-in-out;
+	fill: $colorBlue;
+	cursor: pointer;
+	&:active {
+		fill: darken($colorBlue, 20%);
+	};
+}
+
+circle.lowlight {
+	fill: lighten($colorBlue, 20%);
+}
+
+circle.circulate {
+	transition: all 0.2s ease-in-out;
+}
+
+text.inCircle {
+	-webkit-user-select: none; /* Safari */        
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+/Edge */
+	user-select: none; /* Standard */
+}
