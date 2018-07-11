@@ -3,19 +3,15 @@ $colorBlue: #3264b4;
 
 circle.default {
 	transition: all 0.2s ease-in-out;
-	fill: $colorBlue;
 	cursor: pointer;
-	&:active {
-		fill: darken($colorBlue, 20%);
-	};
-}
-
-circle.lowlight {
-	fill: lighten($colorBlue, 20%);
 }
 
 circle.circulate {
 	transition: all 0.2s ease-in-out;
+}
+
+circle.lowlight {
+	opacity: 0.5;
 }
 
 text.inCircle {
@@ -23,4 +19,19 @@ text.inCircle {
 	-moz-user-select: none; /* Firefox */
 	-ms-user-select: none; /* IE10+/Edge */
 	user-select: none; /* Standard */
+	text-anchor: middle;
+	alignment-baseline: central;
+	pointer-events: none;
+	font-size: 2em;
+}
+
+svg {
+	height: 100%;
+	width: 100%;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
 }
