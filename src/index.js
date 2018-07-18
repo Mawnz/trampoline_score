@@ -17,6 +17,9 @@
 		{skill: 9, points: [0, 1, 2, 3, 4, 5], score: 0},
 		{skill: 10, points: [0, 1, 2, 3, 4, 5], score: 0}
 	];
+	let app_data = {
+		scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	};
 
 	let colorScale = d3.scaleLinear()
 		.domain([0, 3, 5])
@@ -30,8 +33,8 @@
 		active_score = null,
 		transition_duration = 100,
 		index = 0;
-	// SVG
-	let svg = d3.select('body').append('svg');
+	// SVG, hidden on init
+	let svg = d3.select('body').append('svg').style('visibility', 'hidden');
 	// Arcs, first for colors, second for labels
 	let arc = d3.arc()
 		.innerRadius(rad)
@@ -45,47 +48,152 @@
 
 	// Add base elements
 	let big_g = svg.append('svg:g');
-	let skills_g = big_g
-		.selectAll('circle')
-		.data(nodes).enter()
-			.append('g')
-			.attr('id', 'circleContainer')
-			.attr('transform', function(d){
-				return 'translate(' + d.x + ',' + d.y + ')';
-			})
-			.on('touchstart mousedown', expand)
-			.on('touchmove', function(){
-				// First touch
-				let touch = d3.event.touches[0],
-					elFromPoint = d3.select(document.elementFromPoint(touch.clientX, touch.clientY));
 
-				// Reset all colors
-				d3.selectAll('.circleArc')
-					.attr('fill', d => {
-						active_score = null;
-						return d.data.color;
-					});
-				// Change color on element hovered, if hovered
-				if(elFromPoint.attr('class') === 'circleArc'){
-					elFromPoint
+	d3.select(document).on('DOMContentLoaded', function(event) { 
+		// Add event listener for DOM elements
+		d3.select('#start').on('click', start);		
+		d3.select('#restart')
+			.style('display', 'none')
+			.on('click', restart);
+		d3.select('#copy_btn').on('click', copyScores);
+
+		// Create table for scores
+		for(var i = 1; i <= 10; i ++){
+			d3.select('#skill_row')
+				.append('td')
+				.attr('id', 'skill_' + i.toString())
+				.html(i);
+			let score = d3.select('#score_row')
+				.append('td')
+				.attr('id', 'score_' + i.toString());
+			score.append('span')
+				.text('0')
+				.style('background-color', colorScale(0));
+		}
+	});
+	function copyScores(){
+		// We basically create an input element, fill it with the text, copy it, and remove 
+		let input = d3.select('body')
+			.append('input')
+			.attr('value', app_data.scores.toString())
+			.node();
+		// Select content of node, input
+		input.focus();
+		input.select();
+		// Execute command copy
+		document.execCommand('copy');
+		input.remove();
+		alert('Copied scores to clipboard')
+	}
+	function start(){
+		// Hide copy button 
+		d3.select('#copy_btn')
+			.style('opacity', 0);
+		// Init sequence
+		_initSequence();
+		// Hide button
+		d3.select('#button_container')
+			.style('opacity', 0);
+		// Show svg
+		setTimeout(function(){
+			// hide and show stuff
+			d3.select('#copy_btn').style('visibility', 'hidden');
+			d3.select('#button_container')
+				.style('visibility', 'hidden');
+			svg.style('visibility', 'visible');
+		}, 400)
+	}
+	function end(){
+		// Always collapse when releasing mouse
+		d3.selectAll('#circleContainer')
+			.each(collapse);
+
+		active_target = null;
+		active_score = null;
+		// Toggle visibilities etc
+
+		d3.select('#copy_btn')
+			.style('opacity', 1)
+			.style('visibility', 'visible');
+
+		svg.style('visibility', 'hidden');
+		d3.select('#start')
+			.style('display', 'none');
+		d3.select('#restart')
+			.style('display', 'inline-block')
+		d3.select('#button_container')
+			.style('visibility', 'visible')
+			.style('opacity', 1);
+	}
+	function updateScores(scores){
+		// Should be ten records
+		scores.map((score, i) => {
+			i = i + 1
+			// Change each score by assigned id
+			d3.select('#score_' + i.toString())
+				.select('span')
+				.style('background-color', colorScale(score))
+				.text(score);
+		})
+	}
+	function restart(){
+		index = 0;
+		// First remove anything inside the svg
+		big_g.selectAll('g').remove();
+		// Move big_g to the beginning
+		big_g.attr('transform', 'translate(0, 0)');
+		// Default scores
+		app_data.scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+		updateScores(app_data.scores);
+
+		// Hide reset
+		d3.select('#restart')
+			.style('display', 'none')
+		// Show start
+		d3.select('#start')
+			.style('display', 'inline-block');
+	}
+	function _initSequence(){
+		// Then create everything
+		let skills_g = big_g
+			.selectAll('circle')
+			.data(nodes).enter()
+				.append('g')
+				.attr('id', 'circleContainer')
+				.attr('transform', function(d){
+					return 'translate(' + d.x + ',' + d.y + ')';
+				})
+				.on('touchstart mousedown', expand)
+				.on('touchmove', function(){
+					// First touch
+					let touch = d3.event.touches[0],
+						elFromPoint = d3.select(document.elementFromPoint(touch.clientX, touch.clientY));
+
+					// Reset all colors
+					d3.selectAll('.circleArc')
 						.attr('fill', d => {
-							active_score = d.data.value;
-							return d3.rgb(d.data.color).darker(1); 
-						})
-				}			
-			});
-	// Add circles
-	skills_g.call(addCircle);
+							active_score = null;
+							return d.data.color;
+						});
+					// Change color on element hovered, if hovered
+					if(elFromPoint.attr('class') === 'circleArc'){
+						elFromPoint
+							.attr('fill', d => {
+								active_score = d.data.value;
+								return d3.rgb(d.data.color).darker(1); 
+							})
+					}			
+				});
+		// Add circles
+		skills_g.call(addCircle);
 
-	// Add texts
-	skills_g
-		.append('text')
-		.attr('class', 'inCircle')
-		.text(function(d){
-			return d.score;
-		});
-	// Checking
-	function checkInsideElement(coords, bbox){
+		// Add texts
+		skills_g
+			.append('text')
+			.attr('class', 'inCircle')
+			.text(function(d){
+				return d.score;
+			});
 	}
 	// Creation Functions
 	function createNodes(data){
@@ -121,7 +229,11 @@
 			.attr('cx', 0)
 			.attr('cy', 0)
 			.attr('r', rad)
-			.attr('fill', function(d){return colorScale(d.score)})
+			.attr('fill', function(d){
+				// Default state
+				d.score = 0;
+				return colorScale(d.score)
+			})
 			.classed('default', true);
 	}
 	// Event functions
@@ -129,7 +241,6 @@
 		if(!active_target) return;
 		// First check if a selection was made
 		if(active_score != null){
-			index ++;
 			// Change text
 			d3.select(active_target.parentNode)
 				.select('text')
@@ -143,7 +254,12 @@
 				.attr('fill', function(d){
 					return colorScale(d.score);
 				});
+			// Change app data
+			app_data.scores[index] = active_score;
+			updateScores(app_data.scores);
 			// Animate
+			index ++;
+			if(index === data.length) setTimeout(end, 500);		
 			big_g.call(slide);
 			active_score = null;
 		}
@@ -235,7 +351,6 @@
 			.duration(transition_duration)
 				.attr('opacity', 0);
 	}
-
 })();
 /*
 	function placeAround(groups){

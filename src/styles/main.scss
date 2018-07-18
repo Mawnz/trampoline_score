@@ -1,5 +1,10 @@
 $colorBlue: #3264b4;
+$colorGreen: #4CAF50;
+$colorRed: #E34234;
+$colorGray: #BDC3C7;
 
+/* FONT */
+$tableFont: 1.5em;
 
 circle.default {
 	transition: all 0.2s ease-in-out;
@@ -28,10 +33,94 @@ text.inCircle {
 svg {
 	height: 100%;
 	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
 }
 
 html, body {
+	position: relative;
 	height: 100%;
 	width: 100%;
 	overflow: hidden;
+}
+
+button {
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    outline: none;
+    font-size: 46px;
+}
+
+button#start {
+    background-color: $colorGreen;
+    &:active{
+    	background-color: darken($colorGreen, 10%);
+    };	
+}
+button#restart {
+    background-color: $colorRed;
+    &:active{
+    	background-color: darken($colorRed, 10%);
+    };	
+}
+
+button#copy_btn {
+	transition: opacity 0.2s linear;
+	transform: scale(0.5, 0.5);
+	background-color: $colorGray;
+    &:active{
+    	background-color: darken($colorGray, 10%);
+    };		
+}
+
+div#button_container {
+	transition: opacity 0.2s linear;
+	height: 100%;
+	width: 100%;
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+div.score_container{
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: flex;	
+	justify-content: center;
+	width: 100%;
+	height: 25%;
+}
+
+table#score_table {
+	height: 25%;
+	width: 90%;
+	font-size: $tableFont;
+	border-collapse: collapse;
+
+}
+
+table#score_table td{
+	text-align: center;
+	width: $tableFont;
+	/*
+	border-right-style: solid;
+	border-left-style: solid;
+	border-width: 0.5px
+	*/
+}
+
+table#score_table td span{
+	mix-blend-mode: difference;
+}
+
+table#score_table tr#copy_text {
+	height: 3em;
 }
